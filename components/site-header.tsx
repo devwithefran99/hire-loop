@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { MenuIcon } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -16,6 +16,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { MobileUserMenu, UserMenu } from "@/components/user-menu"
+import { authClient, useSession } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -87,7 +89,24 @@ function NavLinks({
 
 function SiteHeader() {
   const pathname = usePathname() ?? "/"
+  const router = useRouter()
   const [menuOpen, setMenuOpen] = React.useState(false)
+  const [signingOut, setSigningOut] = React.useState(false)
+  const { data: session, isPending } = useSession()
+  const user = session?.user ?? null
+
+  async function handleSignOut() {
+    setSigningOut(true)
+
+    try {
+      await authClient.signOut()
+      setMenuOpen(false)
+      router.push("/")
+      router.refresh()
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-background from-55% to-transparent px-4 pt-3 pb-3 sm:px-6 lg:px-8 xl:px-20">
@@ -107,28 +126,43 @@ function SiteHeader() {
 
             <Separator
               orientation="vertical"
-              className="h-6 mt-3 bg-hl-text-secondary/40"
+              className="mt-3 h-6 bg-hl-text-secondary/40"
             />
 
             <div className="flex items-center gap-2">
-              <Link
-                href="/sign-in"
-                className={cn(
-                  buttonVariants(),
-                  "h-10 rounded-lg border border-black/10 bg-white px-4 text-[15px] font-semibold text-hl-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/90 hover:text-hl-brand"
-                )}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/sign-up"
-                className={cn(
-                  buttonVariants(),
-                  "h-10 rounded-lg bg-hl-brand px-5 text-[15px] font-semibold text-hl-brand-foreground shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-hl-brand/90"
-                )}
-              >
-                Get Started
-              </Link>
+              {isPending ? (
+                <div aria-hidden className="flex items-center gap-2.5 pr-2">
+                  <span className="size-9 animate-pulse rounded-full bg-hl-surface-3" />
+                  <span className="h-3 w-20 animate-pulse rounded-full bg-hl-surface-3" />
+                </div>
+              ) : user ? (
+                <UserMenu
+                  user={user}
+                  signingOut={signingOut}
+                  onSignOut={handleSignOut}
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/sign-in"
+                    className={cn(
+                      buttonVariants(),
+                      "h-10 rounded-lg border border-black/10 bg-white px-4 text-[15px] font-semibold text-hl-brand shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-white/90 hover:text-hl-brand"
+                    )}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className={cn(
+                      buttonVariants(),
+                      "h-10 rounded-lg bg-hl-brand px-5 text-[15px] font-semibold text-hl-brand-foreground shadow-[inset_0_3px_10px_rgba(255,255,255,0.2)] hover:bg-hl-brand/90"
+                    )}
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </nav>
@@ -181,26 +215,44 @@ function SiteHeader() {
             </nav>
 
             <SheetFooter className="gap-2 border-t border-hl-border-subtle p-4">
-              <Link
-                href="/sign-in"
-                onClick={() => setMenuOpen(false)}
-                className={cn(
-                  buttonVariants(),
-                  "h-11 rounded-lg border border-black/10 bg-white text-[15px] font-semibold text-hl-brand hover:bg-white/90 hover:text-hl-brand"
-                )}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/sign-up"
-                onClick={() => setMenuOpen(false)}
-                className={cn(
-                  buttonVariants(),
-                  "h-11 rounded-lg bg-hl-brand text-[15px] font-semibold text-hl-brand-foreground hover:bg-hl-brand/90"
-                )}
-              >
-                Get Started
-              </Link>
+              {isPending ? (
+                <div aria-hidden className="flex items-center gap-3">
+                  <span className="size-10 animate-pulse rounded-full bg-hl-surface-3" />
+                  <div className="flex flex-col gap-1.5">
+                    <span className="h-3 w-28 animate-pulse rounded-full bg-hl-surface-3" />
+                    <span className="h-2.5 w-20 animate-pulse rounded-full bg-hl-surface-3" />
+                  </div>
+                </div>
+              ) : user ? (
+                <MobileUserMenu
+                  user={user}
+                  signingOut={signingOut}
+                  onSignOut={handleSignOut}
+                />
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      buttonVariants(),
+                      "h-11 rounded-lg border border-black/10 bg-white text-[15px] font-semibold text-hl-brand hover:bg-white/90 hover:text-hl-brand"
+                    )}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      buttonVariants(),
+                      "h-11 rounded-lg bg-hl-brand text-[15px] font-semibold text-hl-brand-foreground hover:bg-hl-brand/90"
+                    )}
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </SheetFooter>
           </SheetContent>
         </Sheet>
