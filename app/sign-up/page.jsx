@@ -64,8 +64,8 @@ export default function SignUpPage() {
       return
     }
 
-    // 3. Sign up hole auto sign-in hoy, tai homepage e pathai
-    router.push("/")
+    // 3. Sign up hole auto sign-in hoy, tai role er dashboard e pathai
+    router.push(`/dashboard/${role}`)
     router.refresh()
   }
 
@@ -74,7 +74,7 @@ export default function SignUpPage() {
     setGoogleLoading(true)
     const { error: googleError } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/",
+      callbackURL: "/dashboard",
     })
     if (googleError) {
       setError(googleError.message || "Google sign up failed.")

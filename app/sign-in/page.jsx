@@ -1,60 +1,68 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { authClient } from "@/lib/auth-client"
+import { normalizeRole } from "@/lib/auth-roles"
 
 // Input er style ek jayga te rakhlam, pore ekhane theke sob input customize korte parba
 const inputClass =
-  "h-11 rounded-xl border-hl-border-default bg-hl-surface-input text-hl-text-primary placeholder:text-hl-text-tertiary";
+  "h-11 rounded-xl border-hl-border-default bg-hl-surface-input text-hl-text-primary placeholder:text-hl-text-tertiary"
 
 export default function SignInPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    e.preventDefault()
+    setError("")
+    setLoading(true)
 
     // Better Auth diye sign in (MongoDB te user check kore)
-    const { error: signInError } = await authClient.signIn.email({
+    const { data, error: signInError } = await authClient.signIn.email({
       email: email.trim(),
       password,
-    });
-    setLoading(false);
+    })
+    setLoading(false)
 
     if (signInError) {
-      setError(signInError.message || "Invalid email or password.");
-      return;
+      setError(signInError.message || "Invalid email or password.")
+      return
     }
 
-    router.push("/");
-    router.refresh();
+    // Role onujayi dashboard e pathai
+    let role = data?.user?.role
+    if (!role) {
+      const { data: session } = await authClient.getSession()
+      role = session?.user?.role
+    }
+
+    router.push(`/dashboard/${normalizeRole(role)}`)
+    router.refresh()
   }
 
   async function handleGoogle() {
-    setError("");
-    setGoogleLoading(true);
+    setError("")
+    setGoogleLoading(true)
     const { error: googleError } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/",
-    });
+      callbackURL: "/dashboard",
+    })
     if (googleError) {
-      setError(googleError.message || "Google sign in failed.");
-      setGoogleLoading(false);
+      setError(googleError.message || "Google sign in failed.")
+      setGoogleLoading(false)
     }
   }
 
@@ -83,10 +91,22 @@ export default function SignInPage() {
             <Loader2 className="size-4 animate-spin" />
           ) : (
             <svg viewBox="0 0 24 24" aria-hidden className="size-[18px]">
-              <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.45a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.56-5.17 3.56-8.86Z" />
-              <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3a7.2 7.2 0 0 1-10.73-3.78H1.3v3.1A12 12 0 0 0 12 24Z" />
-              <path fill="#FBBC05" d="M5.34 14.32a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4.04-3.08Z" />
-              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.3 6.6l4.04 3.1A7.2 7.2 0 0 1 12 4.75Z" />
+              <path
+                fill="#4285F4"
+                d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.45a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.56-5.17 3.56-8.86Z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.88-3a7.2 7.2 0 0 1-10.73-3.78H1.3v3.1A12 12 0 0 0 12 24Z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.34 14.32a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4.04-3.08Z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.3 6.6l4.04 3.1A7.2 7.2 0 0 1 12 4.75Z"
+              />
             </svg>
           )}
           Continue with Google
@@ -95,7 +115,7 @@ export default function SignInPage() {
         {/* Divider */}
         <div className="my-6 flex items-center gap-3">
           <span className="h-px flex-1 bg-hl-border-subtle" />
-          <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-hl-text-tertiary">
+          <span className="text-[11px] font-medium tracking-[0.16em] text-hl-text-tertiary uppercase">
             or with email
           </span>
           <span className="h-px flex-1 bg-hl-border-subtle" />
@@ -148,9 +168,13 @@ export default function SignInPage() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute right-0 top-0 flex size-11 items-center justify-center text-hl-text-tertiary hover:text-hl-text-primary"
+                className="absolute top-0 right-0 flex size-11 items-center justify-center text-hl-text-tertiary hover:text-hl-text-primary"
               >
-                {showPassword ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+                {showPassword ? (
+                  <EyeOff className="size-[18px]" />
+                ) : (
+                  <Eye className="size-[18px]" />
+                )}
               </button>
             </div>
           </div>
@@ -176,11 +200,14 @@ export default function SignInPage() {
 
         <p className="mt-6 text-center text-sm text-hl-text-secondary">
           New to HireLoop?{" "}
-          <Link href="/sign-up" className="font-medium text-hl-brand hover:underline">
+          <Link
+            href="/sign-up"
+            className="font-medium text-hl-brand hover:underline"
+          >
             Create an account
           </Link>
         </p>
       </div>
     </div>
-  );
+  )
 }
