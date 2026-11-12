@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { MenuIcon } from "lucide-react"
+import { MenuIcon, LayoutDashboard } from "lucide-react"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet"
 import { MobileUserMenu, UserMenu } from "@/components/user-menu"
 import { authClient, useSession } from "@/lib/auth-client"
+import { dashboardPathForRole } from "@/lib/auth-roles"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -136,11 +137,23 @@ function SiteHeader() {
                   <span className="h-3 w-20 animate-pulse rounded-full bg-hl-surface-3" />
                 </div>
               ) : user ? (
-                <UserMenu
-                  user={user}
-                  signingOut={signingOut}
-                  onSignOut={handleSignOut}
-                />
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={dashboardPathForRole(user.role)}
+                    className={cn(
+                      buttonVariants(),
+                      "h-10 gap-1.5 rounded-lg border border-hl-border-default bg-hl-surface-2 px-3 text-[13px] font-semibold text-hl-text-primary shadow-none hover:bg-hl-surface-3 hover:text-hl-text-primary"
+                    )}
+                  >
+                    <LayoutDashboard className="size-4 text-hl-text-tertiary" />
+                    Dashboard
+                  </Link>
+                  <UserMenu
+                    user={user}
+                    signingOut={signingOut}
+                    onSignOut={handleSignOut}
+                  />
+                </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Link
@@ -211,6 +224,19 @@ function SiteHeader() {
                     </li>
                   )
                 })}
+
+                {user && (
+                  <li className="mt-2 border-t border-hl-border-subtle pt-2">
+                    <Link
+                      href={dashboardPathForRole(user.role)}
+                      onClick={() => setMenuOpen(false)}
+                      className="flex h-11 items-center gap-2.5 rounded-lg px-3 text-base font-semibold tracking-[-0.01em] text-hl-text-primary transition-colors outline-none hover:bg-hl-surface-2 focus-visible:bg-hl-surface-2"
+                    >
+                      <LayoutDashboard className="size-4 text-hl-text-tertiary" />
+                      Dashboard
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
 

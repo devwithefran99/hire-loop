@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/auth-client"
-import { normalizeRole } from "@/lib/auth-roles"
+import { dashboardPathForRole } from "@/lib/auth-roles"
 
 // Input er style ek jayga te rakhlam, pore ekhane theke sob input customize korte parba
 const inputClass =
@@ -49,7 +49,7 @@ export default function SignInPage() {
       role = session?.user?.role
     }
 
-    router.push(`/dashboard/${normalizeRole(role)}`)
+    router.push(dashboardPathForRole(role))
     router.refresh()
   }
 

@@ -10,6 +10,8 @@ import {
 
 import { buttonVariants } from "@/components/ui/button"
 import { getCurrentUser } from "@/lib/auth-server"
+import { JOBS_COLLECTION, type JobDocument } from "@/lib/jobs"
+import { getDb } from "@/lib/mongodb"
 import { cn } from "@/lib/utils"
 
 import {
@@ -23,6 +25,19 @@ import {
 export default async function RecruiterDashboardPage() {
   const user = await getCurrentUser()
   const firstName = user?.name?.trim().split(/\s+/)[0] || "there"
+
+  let activeJobs = 0
+
+  if (user) {
+    try {
+      const db = await getDb()
+      activeJobs = await db
+        .collection<JobDocument>(JOBS_COLLECTION)
+        .countDocuments({ recruiterId: user.id, status: "active" })
+    } catch (error) {
+      console.error("Failed to count active jobs:", error)
+    }
+  }
 
   return (
     <PageShell>
@@ -46,7 +61,7 @@ export default async function RecruiterDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Active jobs"
-          value="0"
+          value={String(activeJobs)}
           hint="Roles currently live"
           icon={Briefcase}
         />

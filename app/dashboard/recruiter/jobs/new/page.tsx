@@ -1,33 +1,12 @@
-"use client"
-
-import * as React from "react"
 import Link from "next/link"
-import { ArrowLeft, CheckCircle2, PlusCircle } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
+import { createJob } from "@/lib/actions/jobs"
 
-import { PageHeader, PageShell, Panel } from "../../../_components/dashboard-ui"
-
-const fieldClass =
-  "h-10 rounded-lg border-hl-border-default bg-hl-surface-input text-sm text-hl-text-primary placeholder:text-hl-text-tertiary"
-
-const selectClass =
-  "h-10 w-full rounded-lg border border-hl-border-default bg-hl-surface-input px-2.5 text-sm text-hl-text-primary outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-
-const textareaClass =
-  "w-full rounded-lg border border-hl-border-default bg-hl-surface-input px-2.5 py-2 text-sm text-hl-text-primary outline-none placeholder:text-hl-text-tertiary focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+import { PageHeader, PageShell } from "../../../_components/dashboard-ui"
+import { JobForm } from "../_components/job-form"
 
 export default function NewRecruiterJobPage() {
-  const [submitted, setSubmitted] = React.useState(false)
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSubmitted(true)
-  }
-
   return (
     <PageShell>
       <div>
@@ -46,151 +25,18 @@ export default function NewRecruiterJobPage() {
       />
 
       <div className="rounded-lg border border-hl-border-subtle bg-hl-surface-2 px-4 py-2.5 text-xs text-hl-text-tertiary">
-        Preview only — job posts are not saved to a database yet.
+        New jobs are saved to MongoDB and appear on the Manage Jobs page.
       </div>
 
-      {submitted && (
-        <div className="flex items-start gap-2.5 rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
-          <span>
-            Your draft was captured. Publishing will be enabled once job
-            management is connected to the backend.
-          </span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Panel
-          title="Job details"
-          description="The basics candidates see first."
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="job-title" className="text-hl-text-secondary">
-                Job title
-              </Label>
-              <Input
-                id="job-title"
-                name="title"
-                required
-                placeholder="Senior Frontend Developer"
-                className={fieldClass}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="company" className="text-hl-text-secondary">
-                Company
-              </Label>
-              <Input
-                id="company"
-                name="company"
-                required
-                placeholder="HireLoop"
-                className={fieldClass}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-hl-text-secondary">
-                Location
-              </Label>
-              <Input
-                id="location"
-                name="location"
-                placeholder="Remote / Dhaka, BD"
-                className={fieldClass}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="work-type" className="text-hl-text-secondary">
-                Work type
-              </Label>
-              <select id="work-type" name="workType" className={selectClass}>
-                <option>Remote</option>
-                <option>Hybrid</option>
-                <option>On-site</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="employment" className="text-hl-text-secondary">
-                Employment type
-              </Label>
-              <select id="employment" name="employment" className={selectClass}>
-                <option>Full-time</option>
-                <option>Part-time</option>
-                <option>Contract</option>
-                <option>Internship</option>
-              </select>
-            </div>
-
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="salary" className="text-hl-text-secondary">
-                Salary range
-              </Label>
-              <Input
-                id="salary"
-                name="salary"
-                placeholder="$60,000 – $90,000 per year"
-                className={fieldClass}
-              />
-            </div>
-          </div>
-        </Panel>
-
-        <Panel
-          title="Description"
-          description="Help candidates understand the role."
-        >
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-hl-text-secondary">
-                About the role
-              </Label>
-              <textarea
-                id="description"
-                name="description"
-                rows={6}
-                placeholder="Describe the role, the team and what success looks like."
-                className={textareaClass}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="requirements" className="text-hl-text-secondary">
-                Requirements
-              </Label>
-              <textarea
-                id="requirements"
-                name="requirements"
-                rows={5}
-                placeholder="List the skills and experience you need."
-                className={textareaClass}
-              />
-            </div>
-          </div>
-        </Panel>
-
-        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Link
-            href="/dashboard/recruiter/jobs"
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "h-9 rounded-lg border-hl-border-default bg-hl-surface-1 px-3.5 text-hl-text-primary hover:bg-hl-surface-2"
-            )}
-          >
-            Cancel
-          </Link>
-          <Button
-            type="submit"
-            className="h-9 rounded-lg bg-hl-brand px-3.5 font-semibold text-hl-brand-foreground hover:bg-hl-brand/90"
-          >
-            <PlusCircle className="size-4" />
-            Publish job
-          </Button>
-        </div>
-      </form>
+      <JobForm
+        action={createJob}
+        submitLabel="Publish job"
+        pendingLabel="Publishing..."
+        successLink={{
+          href: "/dashboard/recruiter/jobs",
+          label: "View job posts",
+        }}
+      />
     </PageShell>
   )
 }

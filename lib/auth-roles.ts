@@ -47,3 +47,8 @@ export function isSignUpRole(value: unknown): value is SignUpRole {
 export function normalizeRole(value: unknown): Role {
   return isRole(value) ? value : DEFAULT_ROLE
 }
+
+/** Role-aware entry point used by the header and the sign-in redirect. */
+export function dashboardPathForRole(value: unknown) {
+  return `/dashboard/${normalizeRole(value)}`
+}
